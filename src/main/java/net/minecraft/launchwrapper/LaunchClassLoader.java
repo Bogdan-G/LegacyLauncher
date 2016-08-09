@@ -156,9 +156,9 @@ public class LaunchClassLoader extends URLClassLoader {
                             packageManifests.put(pkg, manifest);
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
-                                LogWrapper.severe("The jar file %s is trying to seal already secured path %s", jarFile.getName(), packageName);
+                                if (DEBUG) LogWrapper.severe("The jar file %s is trying to seal already secured path %s", jarFile.getName(), packageName);
                             } else if (isSealed(packageName, manifest)) {
-                                LogWrapper.severe("The jar file %s has a security seal for path %s, but that path is defined and not secure", jarFile.getName(), packageName);
+                                if (DEBUG) LogWrapper.severe("The jar file %s has a security seal for path %s, but that path is defined and not secure", jarFile.getName(), packageName);
                             }
                         }
                     }
@@ -168,7 +168,7 @@ public class LaunchClassLoader extends URLClassLoader {
                         pkg = definePackage(packageName, null, null, null, null, null, null, null);
                         packageManifests.put(pkg, EMPTY);
                     } else if (pkg.isSealed()) {
-                        LogWrapper.severe("The URL %s is defining elements for sealed path %s", urlConnection.getURL(), packageName);
+                        if (DEBUG) LogWrapper.severe("The URL %s is defining elements for sealed path %s", urlConnection.getURL(), packageName);
                     }
                 }
             }
@@ -208,14 +208,17 @@ public class LaunchClassLoader extends URLClassLoader {
             outFile.delete();
         }
 
+        OutputStream output = null;
         try {
             LogWrapper.fine("Saving transformed class \"%s\" to \"%s\"", transformedName, outFile.getAbsolutePath().replace('\\', '/'));
 
-            final OutputStream output = new FileOutputStream(outFile);
+            output = new FileOutputStream(outFile);
             output.write(data);
             output.close();
         } catch (IOException ex) {
             LogWrapper.log(Level.WARN, ex, "Could not save transformed class \"%s\"", transformedName);
+        } finally {
+        try{if (output != null) output.close();} catch (IOException ex) {}
         }
     }
 
@@ -298,12 +301,13 @@ public class LaunchClassLoader extends URLClassLoader {
 
             int read;
             int totalLength = 0;
+            byte[] newBuffer = new byte[0];
             while ((read = stream.read(buffer, totalLength, buffer.length - totalLength)) != -1) {
                 totalLength += read;
 
                 // Extend our buffer
                 if (totalLength >= buffer.length - 1) {
-                    byte[] newBuffer = new byte[buffer.length + BUFFER_SIZE];
+                    newBuffer = new byte[buffer.length + BUFFER_SIZE];
                     System.arraycopy(buffer, 0, newBuffer, 0, buffer.length);
                     buffer = newBuffer;
                 }
@@ -374,7 +378,7 @@ public class LaunchClassLoader extends URLClassLoader {
             resourceCache.put(name, data);
             return data;
         } finally {
-            closeSilently(classStream);
+            if (classStream != null) closeSilently(classStream);
         }
     }
 

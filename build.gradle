@@ -12,7 +12,8 @@ repositories {
 group = 'net.minecraft'
 archivesBaseName = 'launchwrapper'
 version = '1.12'
-sourceCompatibility = 1.6
+sourceCompatibility = 7
+targetCompatibility = 7
 
 dependencies {
     compile 'net.sf.jopt-simple:jopt-simple:4.5'
@@ -35,7 +36,7 @@ artifacts {
 def repoDir = new File(projectDir, "repo")
 repoDir.mkdirs()
 
-uploadArchives {
+/*uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: "file://" + repoDir.absolutePath)
@@ -53,7 +54,7 @@ uploadArchives {
             it.delete()
         }
     }
-}
+}*/
 
 clean << {
     repoDir.deleteDir()
