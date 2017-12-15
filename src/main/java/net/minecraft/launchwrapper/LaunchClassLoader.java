@@ -107,15 +107,15 @@ public class LaunchClassLoader extends URLClassLoader {
             }
         }
 
-        /*if (cachedClasses.containsKey(name)) {
+        if (cachedClasses.containsKey(name)) {
             return cachedClasses.get(name);
-        }*/
+        }
 
         for (final String exception : transformerExceptions) {
             if (name.startsWith(exception)) {
                 try {
                     final Class<?> clazz = super.findClass(name);
-                    //cachedClasses.put(name, clazz);
+                    cachedClasses.put(name, clazz);
                     return clazz;
                 } catch (ClassNotFoundException e) {
                     invalidClasses.add(name);
@@ -126,9 +126,9 @@ public class LaunchClassLoader extends URLClassLoader {
 
         try {
             final String transformedName = transformName(name);
-            /*if (cachedClasses.containsKey(transformedName)) {
+            if (cachedClasses.containsKey(transformedName)) {
                 return cachedClasses.get(transformedName);
-            }*/
+            }
 
             final String untransformedName = untransformName(name);
 
@@ -153,7 +153,7 @@ public class LaunchClassLoader extends URLClassLoader {
                         signers = entry.getCodeSigners();
                         if (pkg == null) {
                             pkg = definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
-                            //packageManifests.put(pkg, manifest);
+                            packageManifests.put(pkg, manifest);
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
                                 if (DEBUG) LogWrapper.severe("The jar file %s is trying to seal already secured path %s", jarFile.getName(), packageName);
@@ -166,7 +166,7 @@ public class LaunchClassLoader extends URLClassLoader {
                     Package pkg = getPackage(packageName);
                     if (pkg == null) {
                         pkg = definePackage(packageName, null, null, null, null, null, null, null);
-                        //packageManifests.put(pkg, EMPTY);
+                        packageManifests.put(pkg, EMPTY);
                     } else if (pkg.isSealed()) {
                         if (DEBUG) LogWrapper.severe("The URL %s is defining elements for sealed path %s", urlConnection.getURL(), packageName);
                     }
@@ -180,7 +180,7 @@ public class LaunchClassLoader extends URLClassLoader {
 
             final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
             final Class<?> clazz = defineClass(transformedName, transformedClass, 0, transformedClass.length, codeSource);
-            //cachedClasses.put(transformedName, clazz);
+            cachedClasses.put(transformedName, clazz);
             return clazz;
         } catch (Throwable e) {
             invalidClasses.add(name);
@@ -193,7 +193,7 @@ public class LaunchClassLoader extends URLClassLoader {
     }
 
     private void saveTransformedClass(final byte[] data, final String transformedName) {
-        if (tempFolder == null || data == null) {
+        if (tempFolder == null) {
             return;
         }
 
@@ -301,12 +301,13 @@ public class LaunchClassLoader extends URLClassLoader {
 
             int read;
             int totalLength = 0;
+            byte[] newBuffer = new byte[0];
             while ((read = stream.read(buffer, totalLength, buffer.length - totalLength)) != -1) {
                 totalLength += read;
 
                 // Extend our buffer
                 if (totalLength >= buffer.length - 1) {
-                    byte[] newBuffer = new byte[buffer.length + BUFFER_SIZE];
+                    newBuffer = new byte[buffer.length + BUFFER_SIZE];
                     System.arraycopy(buffer, 0, newBuffer, 0, buffer.length);
                     buffer = newBuffer;
                 }
@@ -345,17 +346,15 @@ public class LaunchClassLoader extends URLClassLoader {
     public byte[] getClassBytes(String name) throws IOException {
         if (negativeResourceCache.contains(name)) {
             return null;
-        /*} else if (resourceCache.containsKey(name)) {
-            return resourceCache.get(name);*/
+        } else if (resourceCache.containsKey(name)) {
+            return resourceCache.get(name);
         }
-        byte[] cached = resourceCache.get(name);
-        if(cached != null) return cached;
         if (name.indexOf('.') == -1) {
             for (final String reservedName : RESERVED_NAMES) {
                 if (name.toUpperCase(Locale.ENGLISH).startsWith(reservedName)) {
                     final byte[] data = getClassBytes("_" + name);
                     if (data != null) {
-                        //resourceCache.put(name, data);
+                        resourceCache.put(name, data);
                         return data;
                     }
                 }
@@ -376,7 +375,7 @@ public class LaunchClassLoader extends URLClassLoader {
 
             if (DEBUG) LogWrapper.finest("Loading class %s from resource %s", name, classResource.toString());
             final byte[] data = readFully(classStream);
-            //resourceCache.put(name, data);
+            resourceCache.put(name, data);
             return data;
         } finally {
             if (classStream != null) closeSilently(classStream);
