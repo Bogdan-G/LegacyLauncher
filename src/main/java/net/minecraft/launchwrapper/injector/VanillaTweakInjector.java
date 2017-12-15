@@ -99,7 +99,7 @@ public class VanillaTweakInjector implements IClassTransformer {
             });
             Frame[] frames = Frame.getFrames();
 
-            //if (frames != null) {
+            if (frames != null) {
                 final List<Image> icons = Arrays.<Image>asList(ImageIO.read(smallIcon), ImageIO.read(bigIcon));
 
                 for (Frame frame : frames) {
@@ -109,7 +109,7 @@ public class VanillaTweakInjector implements IClassTransformer {
                         throwable.printStackTrace();
                     }
                 }
-            //}
+            } else {new NullPointerException().printStackTrace();}
         } catch (IOException e) {
             e.printStackTrace();
         }
