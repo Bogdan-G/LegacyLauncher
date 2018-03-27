@@ -78,7 +78,7 @@ public class VanillaTweakInjector implements IClassTransformer {
     public static File inject() {
         // Speed up imageloading
         System.out.println("Turning off ImageIO disk-caching");
-        ImageIO.setUseCache(false);
+        ImageIO.setUseCache(true);
 
         loadIconsOnFrames();
 
