@@ -21,31 +21,31 @@ import org.apache.logging.log4j.core.Logger;
 
 public class LaunchClassLoader extends URLClassLoader {
     public static final int BUFFER_SIZE = 1 << 12;
-    private List<URL> sources;
-    private ClassLoader parent = getClass().getClassLoader();
+    public List<URL> sources;
+    public ClassLoader parent = getClass().getClassLoader();
 
-    private List<IClassTransformer> transformers = new ArrayList<IClassTransformer>(2);
-    private Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<String, Class<?>>();
-    private Set<String> invalidClasses = new HashSet<String>(1000);
+    public List<IClassTransformer> transformers = new ArrayList<IClassTransformer>(2);
+    public Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<String, Class<?>>();
+    public Set<String> invalidClasses = new HashSet<String>(1000);
 
-    private Set<String> classLoaderExceptions = new HashSet<String>();
-    private Set<String> transformerExceptions = new HashSet<String>();
-    private Map<Package, Manifest> packageManifests = new ConcurrentHashMap<Package, Manifest>();
-    private Map<String,byte[]> resourceCache = new ConcurrentHashMap<String,byte[]>(1000);
-    private Set<String> negativeResourceCache = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    public Set<String> classLoaderExceptions = new HashSet<String>();
+    public Set<String> transformerExceptions = new HashSet<String>();
+    public Map<Package, Manifest> packageManifests = new ConcurrentHashMap<Package, Manifest>();
+    public Map<String,byte[]> resourceCache = new ConcurrentHashMap<String,byte[]>(1000);
+    public Set<String> negativeResourceCache = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
-    private IClassNameTransformer renameTransformer;
+    public IClassNameTransformer renameTransformer;
 
-    private static final Manifest EMPTY = new Manifest();
+    public static final Manifest EMPTY = new Manifest();
 
-    private final ThreadLocal<byte[]> loadBuffer = new ThreadLocal<byte[]>();
+    public final ThreadLocal<byte[]> loadBuffer = new ThreadLocal<byte[]>();
 
-    private static final String[] RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
+    public static final String[] RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
 
-    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
-    private static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
-    private static final boolean DEBUG_SAVE = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingSave", "false"));
-    private static File tempFolder = null;
+    public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
+    public static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingFiner", "false"));
+    public static final boolean DEBUG_SAVE = DEBUG && Boolean.parseBoolean(System.getProperty("legacy.debugClassLoadingSave", "false"));
+    public static File tempFolder = null;
 
     public LaunchClassLoader(URL[] sources) {
         super(sources, null);

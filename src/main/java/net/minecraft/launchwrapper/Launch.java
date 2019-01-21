@@ -19,7 +19,7 @@ import java.util.Set;
 import org.apache.logging.log4j.Level;
 
 public class Launch {
-    private static final String DEFAULT_TWEAK = "net.minecraft.launchwrapper.VanillaTweaker";
+    public static final String DEFAULT_TWEAK = "net.minecraft.launchwrapper.VanillaTweaker";
     public static File minecraftHome;
     public static File assetsDir;
     public static Map<String,Object> blackboard;
